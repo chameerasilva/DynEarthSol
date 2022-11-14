@@ -20,6 +20,11 @@
 #include "phasechanges.hpp"
 #include "remeshing.hpp"
 #include "rheology.hpp"
+#include "childInterface.h"
+
+//#if HAVE_CHILD
+#include "/home/chameera/Research/DES3D-CHILD coupling project/test_snac_child_without_flat_namespace/Coupling_SNAC_CHILD/childInterface/childInterface_Wrapper.h"
+//#endif
 
 #ifdef WIN32
 #ifdef _MSC_VER
@@ -27,6 +32,7 @@
 #endif // _MSC_VER
 namespace std { using ::snprintf; }
 #endif // WIN32
+//Predicates predicate;
 
 void init_var(const Param& param, Variables& var)
 {
@@ -66,6 +72,9 @@ void init_var(const Param& param, Variables& var)
 
 void init(const Param& param, Variables& var)
 {
+    // --------------------------------------variables for child interface initialization---------------------------------------------//
+    const void *childinterface;
+    //----------------------------------------modification End-------------------------------------------------------------------------//
     std::cout << "Initializing mesh and field data...\n";
 
     create_new_mesh(param, var);
@@ -98,6 +107,10 @@ void init(const Param& param, Variables& var)
     initial_weak_zone(param, var, *var.plstrain);
 
     phase_changes_init(param, var);
+    // -------------------------------May be suitable location for Child_interface Initialization------------------------------------------//
+    var.cI = new childInterface;
+    var.cI -> Initialize(param.sim.child_input_file_name); //line 77 from childInterface.h  void Initialize( string argument_string ); may be needed to update in future implementations
+    //---------------------------------Implementation end---------------------------------------------------------------------------------//
 }
 
 
@@ -270,10 +283,10 @@ void isostasy_adjustment(const Param &param, Variables &var)
     std::cout << "Adjusted isostasy for " << iso_steps << " steps.\n";
 }
 
-
 int main(int argc, const char* argv[])
 {
     double start_time = 0;
+    
 #ifdef USE_OMP
     start_time = omp_get_wtime();
 #endif
@@ -295,7 +308,7 @@ int main(int argc, const char* argv[])
     //
     static Variables var; // declared as static to silence valgrind's memory leak detection
     init_var(param, var);
-
+    
     Output output(param, start_time,
                   (param.sim.is_restarting) ? param.sim.restarting_from_frame : 0);
 
@@ -404,7 +417,7 @@ int main(int argc, const char* argv[])
         }
 
     } while (var.steps < param.sim.max_steps && var.time <= param.sim.max_time_in_yr * YEAR2SEC);
-
+    delete var.cI;
     std::cout << "Ending simulation.\n";
     return 0;
 }

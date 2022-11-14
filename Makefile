@@ -18,11 +18,21 @@
 ndims = 3
 opt = 2
 openmp = 1
-useadapt = 0
+useadapt =0
 usemmg = 0
 adaptive_time_step = 0
 use_R_S = 0
 useexo = 0
+usechild = 1
+
+ifeq ($(usechild), 1)
+	CHILD_CXXFLAGS =-I/home/chameera/Research/DES3D-CHILD\ coupling\ project/test_snac_child_without_flat_namespace/Coupling_SNAC_CHILD/child/Code/ChildInterface
+	CHILD_DIR = /home/chameera/Research/DES3D-CHILD\ coupling\ project/test_snac_child_without_flat_namespace/Coupling_SNAC_CHILD/child/bin
+	CHILDINTERFACE_DIR = /home/chameera/Research/DES3D-CHILD\ coupling\ project/test_snac_child_without_flat_namespace/Coupling_SNAC_CHILD/childInterface
+	CHILD_LDFLAGS =-g -L${CHILDINTERFACE_DIR} -lchildInterfaceWrapper
+	CHILD_LDFLAGS +=-L${CHILD_DIR} -lchild
+	CHILD_LDFLAGS += -Wl,-rpath=${CHILD_DIR} -Wl,-rpath=${CHILDINTERFACE_DIR}
+endif
 
 ifeq ($(ndims), 2)
 	useadapt = 0  # libadaptivity is 3d only
@@ -53,7 +63,7 @@ else
 endif
 
 ## path to Boost's base directory, if not in standard system location
-BOOST_ROOT_DIR =
+BOOST_ROOT_DIR = /home/chameera/Research/DES3D-CHILD\ coupling\ project/des3d_from_tan_with_libchild/boost_1_80_0
 
 ########################################################################
 ## Select compiler and linker flags
@@ -252,6 +262,11 @@ endif
 ifeq ($(usemmg), 1)
 	CXXFLAGS += $(MMG_CXXFLAGS)
 	LDFLAGS += $(MMG_LDFLAGS)
+endif
+
+ifeq ($(usechild), 1)
+	CXXFLAGS += $(CHILD_CXXFLAGS)
+	LDFLAGS += $(CHILD_LDFLAGS)
 endif
 
 C3X3_DIR = 3x3-C

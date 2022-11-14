@@ -8,6 +8,10 @@
 
 #include "constants.hpp"
 #include "array2d.hpp"
+#include "childInterface.h"
+//#if HAVE_CHILD
+#include "/home/chameera/Research/DES3D-CHILD coupling project/test_snac_child_without_flat_namespace/Coupling_SNAC_CHILD/childInterface/childInterface_Wrapper.h"
+//#endif
 
 typedef std::pair<double,double> double_pair;
 
@@ -46,6 +50,7 @@ struct Sim {
     bool has_marker_output;
 
     std::string modelname;
+    std::string child_input_file_name;
     std::string restarting_from_modelname;
 };
 
@@ -275,6 +280,8 @@ struct Variables {
     Array2D<int,1> *hydrous_elemmarkers; // for markersets[hydrous_marker_index] (hydrous markers)
 
     PhaseChange *phch;
+
+    childInterface *cI;
 };
 
 #endif
