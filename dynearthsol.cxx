@@ -72,8 +72,8 @@ void init_var(const Param& param, Variables& var)
 
 void init(const Param& param, Variables& var)
 {
-    // --------------------------------------variables for child interface initialization---------------------------------------------//
-    const void *childinterface;
+     // --------------------------------------variables for child interface initialization---------------------------------------------//
+    // const void *childinterface;
     //----------------------------------------modification End-------------------------------------------------------------------------//
     std::cout << "Initializing mesh and field data...\n";
 
