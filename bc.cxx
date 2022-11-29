@@ -699,7 +699,7 @@ namespace {
         const int top_bdry = iboundz1;
         const int_vec& top_nodes = var.bnodes[top_bdry];
         const std::size_t ntop = top_nodes.size();
-
+        //std::vector <double*> surf_nodes(top_nodes);
         // loops over all top nodes
         for (std::size_t i=0; i<ntop; ++i) {
             int n = top_nodes[i];
