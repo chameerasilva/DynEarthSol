@@ -718,7 +718,17 @@ namespace {
             coord[n][NDIMS-1] += dh;
         }
     }
-
+#ifdef HAVE_CHILD
+    void surface_processes_by_CHILD(Variables& var)
+    {
+        // Modify surface topo using CHILD 
+        var.cI->ModifyCoords( var.surf_points );
+        // Run CHILD for dt.
+        var.cI->Run( var.dt/3.1536e7 ); // dt should be given as [year].
+        // Modify the surface topo using the
+        var.cI->GetNewCoords( var.surf_points );
+    }
+#endif
 }
 
 
@@ -734,6 +744,29 @@ void surface_processes(const Param& param, const Variables& var, array_t& coord)
     case 101:
         custom_surface_processes(var, coord);
         break;
+    default:
+        std::cout << "Error: unknown surface process option: " << param.control.surface_process_option << '\n';
+        std::exit(1);
+    }
+}
+
+void surface_processes(const Param& param, Variables& var, array_t& coord)
+{
+    switch (param.control.surface_process_option) {
+    case 0:
+        // no surface process
+        break;
+    case 1:
+        simple_diffusion(var, coord, param.control.surface_diffusivity);
+        break;
+    case 101:
+        custom_surface_processes(var, coord);
+        break;
+#ifdef HAVE_CHILD
+    case 102:
+        surface_processes_by_CHILD(var);
+        break;   
+#endif 
     default:
         std::cout << "Error: unknown surface process option: " << param.control.surface_process_option << '\n';
         std::exit(1);

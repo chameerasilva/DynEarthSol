@@ -22,17 +22,12 @@
 #include "rheology.hpp"
 #include "childInterface.h"
 
-//#if HAVE_CHILD
-#include "/home/chameera/Research/DES3D-CHILD coupling project/test_snac_child_without_flat_namespace/Coupling_SNAC_CHILD/childInterface/childInterface_Wrapper.h"
-//#endif
-
 #ifdef WIN32
 #ifdef _MSC_VER
 #define snprintf _snprintf
 #endif // _MSC_VER
 namespace std { using ::snprintf; }
 #endif // WIN32
-//Predicates predicate;
 
 void init_var(const Param& param, Variables& var)
 {
@@ -107,10 +102,29 @@ void init(const Param& param, Variables& var)
     initial_weak_zone(param, var, *var.plstrain);
 
     phase_changes_init(param, var);
-    // -------------------------------May be suitable location for Child_interface Initialization------------------------------------------//
+#ifdef HAVE_CHILD
+    const int top_bdry = iboundz1;
+    const int_vec& top_nodes = var.bnodes[top_bdry];
+    const std::size_t ntop = top_nodes.size();
+    
+    var.surf_points.clear();
+    var.surf_bmarkers.clear();
+    // loops over all top nodes
+    for (std::size_t i=0; i<ntop; ++i) {
+        int n = top_nodes[i];
+        var.surf_points.push_back( (*(var.coord))[n] );
+        if( (*var.bcflag)[n] & (BOUNDX0 | BOUNDX1 | BOUNDY0 | BOUNDY1) ) 
+            var.surf_bmarkers.push_back(1);
+        else
+            var.surf_bmarkers.push_back(0);
+    }
+    if( var.cI != nullptr ) {
+        delete var.cI;
+        var.cI = nullptr;
+    }
     var.cI = new childInterface;
-    var.cI -> Initialize(param.sim.child_input_file_name); //line 77 from childInterface.h  void Initialize( string argument_string ); may be needed to update in future implementations
-    //---------------------------------Implementation end---------------------------------------------------------------------------------//
+    (var.cI)->Initialize(param.sim.child_input_file_name, ntop, var.surf_points, var.surf_bmarkers);
+#endif
 }
 
 
@@ -228,6 +242,30 @@ void restart(const Param& param, Variables& var)
     }
 
     phase_changes_init(param, var);
+
+#ifdef HAVE_CHILD
+    const int top_bdry = iboundz1;
+    const int_vec& top_nodes = var.bnodes[top_bdry];
+    const std::size_t ntop = top_nodes.size();
+    
+    var.surf_points.clear();
+    var.surf_bmarkers.clear();
+    // loops over all top nodes
+    for (std::size_t i=0; i<ntop; ++i) {
+        int n = top_nodes[i];
+        var.surf_points.push_back( (*(var.coord))[n] );
+        if( (*var.bcflag)[n] & (BOUNDX0 | BOUNDX1 | BOUNDY0 | BOUNDY1) ) 
+            var.surf_bmarkers.push_back(1);
+        else
+            var.surf_bmarkers.push_back(0);
+    }
+    if( var.cI != nullptr ) {
+        delete var.cI;
+        var.cI = nullptr;
+    }
+    var.cI = new childInterface;
+    (var.cI)->Initialize(param.sim.child_input_file_name, ntop, var.surf_points, var.surf_bmarkers);
+#endif
 }
 
 

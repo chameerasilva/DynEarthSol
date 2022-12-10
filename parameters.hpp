@@ -9,9 +9,7 @@
 #include "constants.hpp"
 #include "array2d.hpp"
 #include "childInterface.h"
-//#if HAVE_CHILD
-#include "/home/chameera/Research/DES3D-CHILD coupling project/test_snac_child_without_flat_namespace/Coupling_SNAC_CHILD/childInterface/childInterface_Wrapper.h"
-//#endif
+#include "childInterface_Wrapper.h"
 
 typedef std::pair<double,double> double_pair;
 
@@ -282,6 +280,9 @@ struct Variables {
     PhaseChange *phch;
 
     childInterface *cI;
+    std::vector<double *> surf_points;
+    std::vector<int> surf_bmarkers;
+
 };
 
 #endif

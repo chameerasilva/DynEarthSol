@@ -2031,6 +2031,30 @@ void remesh(const Param &param, Variables &var, int bad_quality)
         update_force(param, var, *var.force);
     }
 
+    #ifdef HAVE_CHILD
+    const int top_bdry = iboundz1;
+    const int_vec& top_nodes = var.bnodes[top_bdry];
+    const std::size_t ntop = top_nodes.size();
+    
+    var.surf_points.clear();
+    var.surf_bmarkers.clear();
+    // loops over all top nodes
+    for (std::size_t i=0; i<ntop; ++i) {
+        int n = top_nodes[i];
+        var.surf_points.push_back( (*(var.coord))[n] );
+        if( (*var.bcflag)[n] & (BOUNDX0 | BOUNDX1 | BOUNDY0 | BOUNDY1) ) 
+            var.surf_bmarkers.push_back(1);
+        else
+            var.surf_bmarkers.push_back(0);
+    }
+    if( var.cI != nullptr ) {
+        delete var.cI;
+        var.cI = nullptr;
+    }
+    var.cI = new childInterface;
+    (var.cI)->Initialize(param.sim.child_input_file_name, ntop, var.surf_points, var.surf_bmarkers);
+#endif
+
     std::cout << "  Remeshing finished.\n";
 }
 
