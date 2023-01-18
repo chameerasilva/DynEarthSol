@@ -1281,11 +1281,18 @@ void optimize_mesh(const Param &param, Variables &var, int bad_quality,
     // }
     //      iii) If a metric field ('solution') is given, 
     //           optimization mode should be off.
-    if ( MMG3D_Set_iparameter(mmgMesh,mmgSol,MMG3D_IPARAM_optim, 0) != 1 ) 
+    // For optimizatio: begin
+    mmgSol = NULL;
+    if ( MMG3D_Set_iparameter(mmgMesh,mmgSol,MMG3D_IPARAM_optim, 1) != 1 ) 
         exit(EXIT_FAILURE);
+    // For optimizatio: end
+    // For refinement: begin
+    // if ( MMG3D_Set_iparameter(mmgMesh,mmgSol,MMG3D_IPARAM_optim, 0) != 1 ) 
+    //     exit(EXIT_FAILURE);
 
     // 4) (not mandatory): check if the number of given entities match with mesh size
-    if( MMG3D_Chk_meshData(mmgMesh, mmgSol) != 1 ) exit(EXIT_FAILURE);
+    // if( MMG3D_Chk_meshData(mmgMesh, mmgSol) != 1 ) exit(EXIT_FAILURE);
+    // For refinement: end
 
     //--- STEP  II: Remesh function
     /* debug mode ON (default value = OFF) */
@@ -2052,7 +2059,10 @@ void remesh(const Param &param, Variables &var, int bad_quality)
         var.cI = nullptr;
     }
     var.cI = new childInterface;
-    (var.cI)->Initialize(param.sim.child_input_file_name, ntop, var.surf_points, var.surf_bmarkers);
+    string argstr;
+    argstr.append( param.sim.child_input_file_name );
+    argstr.append( " --silent-mode" );
+    (var.cI)->Initialize( argstr, ntop, var.surf_points, var.surf_bmarkers );
 #endif
 
     std::cout << "  Remeshing finished.\n";

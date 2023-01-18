@@ -123,7 +123,10 @@ void init(const Param& param, Variables& var)
         var.cI = nullptr;
     }
     var.cI = new childInterface;
-    (var.cI)->Initialize(param.sim.child_input_file_name, ntop, var.surf_points, var.surf_bmarkers);
+    string argstr;
+    argstr.append( param.sim.child_input_file_name );
+    argstr.append( " --silent-mode" );
+    (var.cI)->Initialize(argstr, ntop, var.surf_points, var.surf_bmarkers);
 #endif
 }
 
